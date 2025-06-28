@@ -1,0 +1,12 @@
+{
+  "login": "Login",
+  "signup": "Sign Up",
+  "email": "Email",
+  "password": "Password",
+  "select_role": "Select Role",
+  "recycler": "Recycler",
+  "compounder": "Compounder",
+  "industry": "Industry",
+  "logout": "Logout",
+  "welcome": "Welcome to Eco Trade"
+}

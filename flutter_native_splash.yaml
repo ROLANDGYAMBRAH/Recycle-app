@@ -1,0 +1,8 @@
+flutter_native_splash:
+  color: "#FFFFFF"
+  image: assets/images/recycle_logo.png
+  android: true
+  ios: true
+  web: false
+  android_gravity: center
+  fullscreen: true

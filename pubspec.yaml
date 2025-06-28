@@ -1,0 +1,50 @@
+name: eco_trade_final
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ">=3.3.0 <4.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_native_splash: ^2.4.0
+  url_launcher: ^6.2.6
+  image_picker: ^1.0.7
+  geolocator: ^14.0.1
+  geocoding: ^4.0.0
+  permission_handler: ^12.0.0+1
+   
+   
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/recycle_logo.png
+    - assets/images/collector.png
+    - assets/images/ghana_flag.png
+    - assets/images/onboard1.png
+    - assets/images/onboard2.png
+    - assets/images/onboard3.png
+    - assets/images/informal_icon.png
+    - assets/images/compounder_icon.png
+    - assets/images/company_icon.png
+    - assets/images/profile_location.png
+    - assets/images/items.png
+    - assets/images/welcome.png
+    - assets/images/lady.png
+    - assets/images/google_icon.png
+    - assets/images/profile.png
+    - assets/images/recycle_icon.png
+    - assets/images/plastic.png
+    - assets/images/glass.png
+    - assets/images/metal.png
+    - assets/images/paper.png
+    - assets/images/blue_bag.png
+    - assets/images/collect_waste.png
+    - assets/images/find_compounder.png
+    - assets/images/exchange_cash.png
