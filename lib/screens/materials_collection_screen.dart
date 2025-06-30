@@ -1,6 +1,7 @@
 import 'package:eco_trade_final/screens/topup_wallet_screen.dart';
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class MaterialsCollectionScreen extends StatefulWidget {
   const MaterialsCollectionScreen({super.key});
@@ -21,6 +22,7 @@ class _MaterialsCollectionScreenState extends State<MaterialsCollectionScreen> {
 
   final Map<String, bool> selectedMaterials = {};
   final Map<String, TextEditingController> priceControllers = {};
+  bool isSubmitting = false;
 
   @override
   void initState() {
@@ -39,19 +41,76 @@ class _MaterialsCollectionScreenState extends State<MaterialsCollectionScreen> {
     super.dispose();
   }
 
-  void handleSubmit() {
-    // You can process the selected materials and prices here
-    // Then navigate to the top-up screen
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const TopUpWalletScreen()),
-    );
+  Future<void> handleSubmit() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not authenticated')));
+      return;
+    }
+
+    // Only selected materials with a valid price
+    final Map<String, dynamic> data = {};
+    bool hasAtLeastOne = false;
+
+    for (final material in materials) {
+      if (selectedMaterials[material] == true) {
+        final priceText = priceControllers[material]?.text.trim() ?? '';
+        if (priceText.isEmpty) continue;
+        double? price = double.tryParse(priceText);
+        if (price == null || price <= 0) continue;
+        data[material] = price;
+        hasAtLeastOne = true;
+      }
+    }
+
+    if (!hasAtLeastOne) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select at least one material and enter a valid price.')));
+      return;
+    }
+
+    setState(() => isSubmitting = true);
+
+    try {
+      // Save to Firestore: /compounders/UID/materials
+      await FirebaseFirestore.instance
+          .collection('compounders')
+          .doc(uid)
+          .set({
+        'materials': data,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Materials saved!')));
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const TopUpWalletScreen()),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving data: $e')));
+    } finally {
+      if (mounted) setState(() => isSubmitting = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        foregroundColor: Colors.black87,
+        title: const Text('Materials Collection'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 24),
@@ -91,7 +150,7 @@ class _MaterialsCollectionScreenState extends State<MaterialsCollectionScreen> {
               ),
               const SizedBox(height: 24),
               const Text(
-                'Business Name',
+                'Materials',
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
@@ -134,6 +193,7 @@ class _MaterialsCollectionScreenState extends State<MaterialsCollectionScreen> {
               const SizedBox(height: 16),
               Column(
                 children: materials.map((material) {
+                  final enabled = selectedMaterials[material] ?? false;
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
                     child: Row(
@@ -160,6 +220,7 @@ class _MaterialsCollectionScreenState extends State<MaterialsCollectionScreen> {
                           child: TextField(
                             controller: priceControllers[material],
                             keyboardType: TextInputType.number,
+                            enabled: enabled,
                             decoration: InputDecoration(
                               prefixText: 'GH₵ ',
                               contentPadding: const EdgeInsets.symmetric(horizontal: 12),
@@ -167,6 +228,7 @@ class _MaterialsCollectionScreenState extends State<MaterialsCollectionScreen> {
                                 borderRadius: BorderRadius.circular(10),
                                 borderSide: BorderSide(color: Colors.blue.shade200),
                               ),
+                              hintText: enabled ? '0.00' : '',
                             ),
                           ),
                         ),
@@ -180,14 +242,16 @@ class _MaterialsCollectionScreenState extends State<MaterialsCollectionScreen> {
                 width: double.infinity,
                 height: 52,
                 child: ElevatedButton(
-                  onPressed: handleSubmit,
+                  onPressed: isSubmitting ? null : handleSubmit,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF38B000),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(14),
                     ),
                   ),
-                  child: const Text(
+                  child: isSubmitting
+                      ? const CircularProgressIndicator(color: Colors.white)
+                      : const Text(
                     'Submit',
                     style: TextStyle(
                       fontSize: 18,

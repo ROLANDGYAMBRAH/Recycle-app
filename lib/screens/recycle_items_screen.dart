@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'all_set_screen.dart'; // <-- Make sure this path matches your file!
 
 class RecycleItemsScreen extends StatefulWidget {
@@ -11,6 +13,7 @@ class RecycleItemsScreen extends StatefulWidget {
 class _RecycleItemsScreenState extends State<RecycleItemsScreen> {
   List<String> selectedItems = [];
   String? selectedFrequency;
+  bool isSubmitting = false;
 
   final List<String> recycleItems = [
     'Pure Water Rubbers',
@@ -257,7 +260,9 @@ class _RecycleItemsScreenState extends State<RecycleItemsScreen> {
                   SizedBox(
                     width: double.infinity,
                     height: 52,
-                    child: ElevatedButton(
+                    child: isSubmitting
+                        ? const Center(child: CircularProgressIndicator())
+                        : ElevatedButton(
                       onPressed: _canContinue() ? () {
                         _showSelectionSummary();
                       } : null,
@@ -326,14 +331,24 @@ class _RecycleItemsScreenState extends State<RecycleItemsScreen> {
             child: const Text('Edit'),
           ),
           ElevatedButton(
-            onPressed: () {
+            onPressed: isSubmitting ? null : () {
+              print('=== CONFIRM BUTTON PRESSED ===');
               Navigator.pop(context);
-              _navigateNext();
+              _saveDataAndNavigate();
             },
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF38B000),
             ),
-            child: const Text(
+            child: isSubmitting
+                ? const SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
+            )
+                : const Text(
               'Confirm',
               style: TextStyle(color: Colors.white),
             ),
@@ -343,10 +358,74 @@ class _RecycleItemsScreenState extends State<RecycleItemsScreen> {
     );
   }
 
-  void _navigateNext() {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const AllSetScreen()),
-    );
+  Future<void> _saveDataAndNavigate() async {
+    print('=== SAVE DATA AND NAVIGATE CALLED ===');
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    print('UID: $uid');
+
+    if (uid == null) {
+      print('ERROR: User not authenticated!');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('User not authenticated')),
+        );
+      }
+      return;
+    }
+
+    print('Selected Items: $selectedItems');
+    print('Selected Frequency: $selectedFrequency');
+
+    setState(() => isSubmitting = true);
+
+    try {
+      // Create a map where selected items are set to true
+      final Map<String, bool> materialMap = {
+        for (String item in selectedItems) item: true
+      };
+
+      print('Material map to save: $materialMap');
+      print('=== STARTING FIRESTORE WRITE ===');
+
+      await FirebaseFirestore.instance
+          .collection('users')
+          .doc(uid)
+          .set({
+        'materials': materialMap,
+        'recycleFrequency': selectedFrequency,
+        'updatedAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true));
+
+      print('=== FIRESTORE WRITE SUCCESSFUL ===');
+
+      if (!mounted) return;
+
+      print('=== NAVIGATING TO ALL SET SCREEN ===');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => const AllSetScreen()),
+      );
+
+    } on FirebaseException catch (e) {
+      print('=== FIREBASE EXCEPTION ===');
+      print('Firebase Error: ${e.code} - ${e.message}');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Firebase error: ${e.message}')),
+        );
+      }
+    } catch (e) {
+      print('=== GENERAL EXCEPTION ===');
+      print('Error saving data: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error saving data: $e')),
+        );
+      }
+    } finally {
+      if (mounted) {
+        setState(() => isSubmitting = false);
+      }
+    }
   }
 }

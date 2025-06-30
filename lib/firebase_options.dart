@@ -4,16 +4,6 @@ import 'package:firebase_core/firebase_core.dart' show FirebaseOptions;
 import 'package:flutter/foundation.dart'
     show defaultTargetPlatform, kIsWeb, TargetPlatform;
 
-/// Default [FirebaseOptions] for use with your Firebase apps.
-///
-/// Example:
-/// ```dart
-/// import 'firebase_options.dart';
-/// // ...
-/// await Firebase.initializeApp(
-///   options: DefaultFirebaseOptions.currentPlatform,
-/// );
-/// ```
 class DefaultFirebaseOptions {
   static FirebaseOptions get currentPlatform {
     if (kIsWeb) {
@@ -25,16 +15,13 @@ class DefaultFirebaseOptions {
       case TargetPlatform.iOS:
         return ios;
       case TargetPlatform.macOS:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for macos - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return macos;
       case TargetPlatform.windows:
         return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
+              'you can reconfigure this by running the FlutterFire CLI again.',
         );
       default:
         throw UnsupportedError(
@@ -44,40 +31,52 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyA6jYhPG-GH_iPRPi38E_T5uUUWiBPmNnA',
-    appId: '1:292133189032:web:a99da3e4dc89ea85e1199d',
-    messagingSenderId: '292133189032',
-    projectId: 'eco-trade-app',
-    authDomain: 'eco-trade-app.firebaseapp.com',
-    storageBucket: 'eco-trade-app.firebasestorage.app',
-    measurementId: 'G-Z1P9X4P154',
+    apiKey: 'AIzaSyB_jQOOfDW4uV72_5QPC84s-9KolNGdq8U',
+    appId: '1:849646901741:web:08b60ba2dd28bc74d1efe4',
+    messagingSenderId: '849646901741',
+    projectId: 'eco-trade-dev2',
+    authDomain: 'eco-trade-dev2.firebaseapp.com',
+    databaseURL: 'https://eco-trade-dev2-default-rtdb.firebaseio.com',
+    storageBucket: 'eco-trade-dev2.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyB87PuJWW6DCC2qZLKf_Faje2vKjO6AUnI',
-    appId: '1:292133189032:android:bd458e3795167222e1199d',
-    messagingSenderId: '292133189032',
-    projectId: 'eco-trade-app',
-    storageBucket: 'eco-trade-app.firebasestorage.app',
+    apiKey: 'AIzaSyCkglFWSN-DB4otmZCqYWtEboLFRAHBzrA',
+    appId: '1:849646901741:android:f6f441cbd5405d90d1efe4',
+    messagingSenderId: '849646901741',
+    projectId: 'eco-trade-dev2',
+    databaseURL: 'https://eco-trade-dev2-default-rtdb.firebaseio.com',
+    storageBucket: 'eco-trade-dev2.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyDhBfVWSTIYUnn2kTPUF6Ama6It5s1E1ak',
-    appId: '1:292133189032:ios:87b0750842fc1b3fe1199d',
-    messagingSenderId: '292133189032',
-    projectId: 'eco-trade-app',
-    storageBucket: 'eco-trade-app.firebasestorage.app',
+    apiKey: 'AIzaSyAKTYJcpSnr1Xd_vDOHXTnN7yjboMQv9r8',
+    appId: '1:849646901741:ios:a8052b130e3d7a86d1efe4',
+    messagingSenderId: '849646901741',
+    projectId: 'eco-trade-dev2',
+    databaseURL: 'https://eco-trade-dev2-default-rtdb.firebaseio.com',
+    storageBucket: 'eco-trade-dev2.firebasestorage.app',
     iosBundleId: 'com.example.ecoTradeFinal',
   );
 
   static const FirebaseOptions windows = FirebaseOptions(
-    apiKey: 'AIzaSyA6jYhPG-GH_iPRPi38E_T5uUUWiBPmNnA',
-    appId: '1:292133189032:web:a16d80107cd8598ee1199d',
-    messagingSenderId: '292133189032',
-    projectId: 'eco-trade-app',
-    authDomain: 'eco-trade-app.firebaseapp.com',
-    storageBucket: 'eco-trade-app.firebasestorage.app',
-    measurementId: 'G-7KHRD8G8C3',
+    apiKey: 'AIzaSyB_jQOOfDW4uV72_5QPC84s-9KolNGdq8U',
+    appId: '1:849646901741:web:661863275f5473b3d1efe4',
+    messagingSenderId: '849646901741',
+    projectId: 'eco-trade-dev2',
+    authDomain: 'eco-trade-dev2.firebaseapp.com',
+    databaseURL: 'https://eco-trade-dev2-default-rtdb.firebaseio.com',
+    storageBucket: 'eco-trade-dev2.firebasestorage.app',
+  );
+
+  static const FirebaseOptions macos = FirebaseOptions(
+    apiKey: 'AIzaSyAKTYJcpSnr1Xd_vDOHXTnN7yjboMQv9r8',
+    appId: '1:849646901741:ios:a8052b130e3d7a86d1efe4',
+    messagingSenderId: '849646901741',
+    projectId: 'eco-trade-dev2',
+    databaseURL: 'https://eco-trade-dev2-default-rtdb.firebaseio.com',
+    storageBucket: 'eco-trade-dev2.firebasestorage.app',
+    iosBundleId: 'com.example.ecoTradeFinal',
   );
 
 }

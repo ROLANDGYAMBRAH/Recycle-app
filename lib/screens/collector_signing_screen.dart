@@ -1,5 +1,6 @@
+// File: lib/screens/collector_signing_screen.dart
 import 'package:flutter/material.dart';
-import 'collector_home_screen.dart'; // <-- Make sure this path is correct
+import 'collector_home_screen.dart';
 
 class CollectorSigningScreen extends StatefulWidget {
   const CollectorSigningScreen({Key? key}) : super(key: key);
@@ -9,7 +10,7 @@ class CollectorSigningScreen extends StatefulWidget {
 }
 
 class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
-  int selectedTab = 0; // 0 = Login, 1 = Sign Up
+  int selectedTab = 0;
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _obscurePassword = true;
@@ -52,8 +53,6 @@ class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-
-              // Tabs
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -63,8 +62,6 @@ class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-
-              // Phone field with Ghana flag
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
@@ -73,21 +70,9 @@ class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
                 child: Row(
                   children: [
                     const SizedBox(width: 12),
-                    Image.asset(
-                      'assets/images/ghana_flag.png',
-                      width: 26,
-                      height: 18,
-                      fit: BoxFit.cover,
-                    ),
+                    Image.asset('assets/images/ghana_flag.png', width: 26, height: 18, fit: BoxFit.cover),
                     const SizedBox(width: 7),
-                    const Text(
-                      '+233',
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Color(0xFF333333),
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
+                    const Text('+233', style: TextStyle(fontSize: 16, color: Color(0xFF333333), fontWeight: FontWeight.w600)),
                     const SizedBox(width: 8),
                     Expanded(
                       child: TextField(
@@ -106,8 +91,6 @@ class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
                 ),
               ),
               const SizedBox(height: 14),
-
-              // Password field
               Container(
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(14),
@@ -130,27 +113,16 @@ class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
                       ),
                     ),
                     IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: const Color(0xFF9EA6AE),
-                        size: 24,
-                      ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      icon: Icon(_obscurePassword ? Icons.visibility_off : Icons.visibility,
+                          color: const Color(0xFF9EA6AE), size: 24),
+                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                     ),
                   ],
                 ),
               ),
               const SizedBox(height: 16),
-
-              // Google Sign-In Button
               GestureDetector(
-                onTap: () {
-                  // Google sign in action
-                },
+                onTap: () {},
                 child: Container(
                   width: double.infinity,
                   height: 50,
@@ -162,118 +134,62 @@ class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Image.asset(
-                        'assets/images/google_icon.png',
-                        width: 24,
-                        height: 24,
-                      ),
+                      Image.asset('assets/images/google_icon.png', width: 24, height: 24),
                       const SizedBox(width: 8),
-                      const Text(
-                        'Sign in with Google',
-                        style: TextStyle(
-                          fontWeight: FontWeight.w600,
-                          fontSize: 17,
-                          color: Color(0xFF444444),
-                        ),
-                      ),
+                      const Text('Sign in with Google',
+                          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 17, color: Color(0xFF444444))),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 14),
-
-              // Forgot Password
               GestureDetector(
-                onTap: () {
-                  // Forgot password action
-                },
+                onTap: () {},
                 child: const Align(
                   alignment: Alignment.center,
-                  child: Text(
-                    'Forgot password?',
-                    style: TextStyle(
-                      fontSize: 16,
-                      color: Color(0xFF607180),
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
+                  child: Text('Forgot password?',
+                      style: TextStyle(fontSize: 16, color: Color(0xFF607180), fontWeight: FontWeight.w500)),
                 ),
               ),
               const SizedBox(height: 22),
-
-              // Continue Button (Green pill)
               SizedBox(
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    // Navigate to home/dashboard on sign in
                     Navigator.pushReplacement(
                       context,
-                      MaterialPageRoute(
-                        builder: (context) => const CollectorHomeScreen(),
-                      ),
+                      MaterialPageRoute(builder: (context) => const CollectorHomeScreen()),
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF38B000),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(28),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(28)),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Continue',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: Colors.white,
-                      letterSpacing: 0.1,
-                    ),
-                  ),
+                  child: const Text('Continue',
+                      style: TextStyle(fontSize: 20, fontWeight: FontWeight.w700, color: Colors.white, letterSpacing: 0.1)),
                 ),
               ),
               const SizedBox(height: 10),
-
-              // Terms
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text(
-                    'By continuing, you agree to our ',
-                    style: TextStyle(
-                      color: Color(0xFF8A98A8),
-                      fontSize: 14,
-                    ),
-                  ),
+                  const Text('By continuing, you agree to our ',
+                      style: TextStyle(color: Color(0xFF8A98A8), fontSize: 14)),
                   GestureDetector(
                     onTap: () {},
-                    child: const Text(
-                      'Terms of',
-                      style: TextStyle(
-                        color: Color(0xFF38B000),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
+                    child: const Text('Terms of',
+                        style: TextStyle(color: Color(0xFF38B000), fontWeight: FontWeight.bold, fontSize: 14, decoration: TextDecoration.underline)),
                   ),
                   const SizedBox(width: 2),
                   GestureDetector(
                     onTap: () {},
-                    child: const Text(
-                      'Service',
-                      style: TextStyle(
-                        color: Color(0xFF38B000),
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                        decoration: TextDecoration.underline,
-                      ),
-                    ),
+                    child: const Text('Service',
+                        style: TextStyle(color: Color(0xFF38B000), fontWeight: FontWeight.bold, fontSize: 14, decoration: TextDecoration.underline)),
                   ),
                 ],
               ),
-
               const SizedBox(height: 20),
             ],
           ),
@@ -285,21 +201,15 @@ class _CollectorSigningScreenState extends State<CollectorSigningScreen> {
   Widget _buildTab(String text, int tabIndex) {
     final isActive = selectedTab == tabIndex;
     return GestureDetector(
-      onTap: () {
-        setState(() {
-          selectedTab = tabIndex;
-        });
-      },
+      onTap: () => setState(() => selectedTab = tabIndex),
       child: Column(
         children: [
-          Text(
-            text,
-            style: TextStyle(
-              color: isActive ? const Color(0xFF11333D) : const Color(0xFFB6C0C9),
-              fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
-              fontSize: 20,
-            ),
-          ),
+          Text(text,
+              style: TextStyle(
+                color: isActive ? const Color(0xFF11333D) : const Color(0xFFB6C0C9),
+                fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
+                fontSize: 20,
+              )),
           const SizedBox(height: 5),
           Container(
             height: 2.6,

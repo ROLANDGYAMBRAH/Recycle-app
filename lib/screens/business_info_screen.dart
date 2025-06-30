@@ -1,6 +1,12 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:flutter/cupertino.dart';
-import 'materials_collection_screen.dart'; // <-- Ensure this path is correct
+import 'package:image_picker/image_picker.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:eco_trade_final/screens/materials_collection_screen.dart'; // Correct import path
+import 'package:mime/mime.dart';
+import 'package:path/path.dart' as p;
 
 class BusinessInfoScreen extends StatefulWidget {
   const BusinessInfoScreen({super.key});
@@ -13,15 +19,168 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
   final TextEditingController _businessNameController = TextEditingController();
   String selectedType = 'Individual';
   String? selectedArea;
-  bool isLoadingLocation = false;
+  File? profileImage;
+  File? coverImage;
+  bool isSaving = false;
 
   final List<String> types = ['Individual', 'Group', 'Company-Linked'];
   final List<String> areas = ['Accra', 'Tema', 'Madina', 'Kasoa'];
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void dispose() {
+    _businessNameController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _pickImage(bool isProfile) async {
+    final img = await _picker.pickImage(
+      source: ImageSource.gallery,
+      maxWidth: 1800,
+      maxHeight: 1800,
+      imageQuality: 80,
+    );
+    if (img == null) return;
+
+    final bytes = await File(img.path).length();
+    if (bytes > 5 * 1024 * 1024) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Photo must be under 5 MB')),
+      );
+      return;
+    }
+    setState(() {
+      if (isProfile) {
+        profileImage = File(img.path);
+      } else {
+        coverImage = File(img.path);
+      }
+    });
+  }
+
+  Future<String> _uploadImage(File image, String storagePath) async {
+    final uid = FirebaseAuth.instance.currentUser!.uid;
+    final ext = p.extension(image.path).toLowerCase();
+    final bytes = await image.readAsBytes();
+    final mimeType = lookupMimeType(image.path, headerBytes: bytes) ?? 'image/jpeg';
+    final ref = FirebaseStorage.instance.ref().child('$storagePath/$uid$ext');
+    final uploadTask = ref.putData(bytes, SettableMetadata(contentType: mimeType));
+    final snapshot = await uploadTask;
+    return await snapshot.ref.getDownloadURL();
+  }
+
+  Future<void> _saveBusinessInfo() async {
+    final uid = FirebaseAuth.instance.currentUser?.uid;
+    if (uid == null) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Not authenticated')));
+      return;
+    }
+
+    final name = _businessNameController.text.trim();
+
+    if (name.isEmpty || selectedArea == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enter business name and select area')),
+      );
+      return;
+    }
+    if (profileImage == null || coverImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Upload both profile and cover photos')),
+      );
+      return;
+    }
+
+    setState(() => isSaving = true);
+
+    try {
+      // Upload profile and cover images
+      final profileUrl = await _uploadImage(profileImage!, 'compounders/profile_photo');
+      final coverUrl = await _uploadImage(coverImage!, 'compounders/cover_photo');
+
+      await FirebaseFirestore.instance.collection('users').doc(uid).set({
+        'businessName'    : name,
+        'businessType'    : selectedType,
+        'businessArea'    : selectedArea,
+        'profileImageUrl' : profileUrl,
+        'coverImageUrl'   : coverUrl,
+      }, SetOptions(merge: true));
+
+      setState(() => isSaving = false);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MaterialsCollectionScreen()),
+      );
+    } catch (e) {
+      setState(() => isSaving = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not save info: $e')),
+      );
+    }
+  }
+
+  Widget _photoPicker({
+    required String label,
+    required bool isProfile,
+    required File? image,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label, style: const TextStyle(fontWeight: FontWeight.w600)),
+        const SizedBox(height: 8),
+        GestureDetector(
+          onTap: () => _pickImage(isProfile),
+          child: Container(
+            height: 50,
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey.shade300),
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(Icons.camera_alt_outlined, color: Colors.blue),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    image != null ? 'Photo Selected' : 'Upload Photo',
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(
+                      color: Colors.blue,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                if (image != null) ...[
+                  const SizedBox(width: 4),
+                  CircleAvatar(
+                    backgroundImage: FileImage(image),
+                    radius: 14, // Smaller avatar
+                  ),
+                ]
+              ],
+            ),
+          ),
+        ),
+      ],
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        elevation: 0,
+        backgroundColor: Colors.white,
+        iconTheme: const IconThemeData(color: Colors.black),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.of(context).maybePop(),
+        ),
+      ),
       body: SafeArea(
         child: Stack(
           children: [
@@ -73,7 +232,7 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                   TextField(
                     controller: _businessNameController,
                     decoration: InputDecoration(
-                      hintText: 'Business Type',
+                      hintText: 'Business Name',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(10),
                       ),
@@ -106,73 +265,18 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                   Row(
                     children: [
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Profile Photo',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.shade300),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Center(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Icon(Icons.camera_alt_outlined, color: Colors.blue),
-                                      SizedBox(width: 6),
-                                      Text(
-                                        'Upload Photo',
-                                        style: TextStyle(
-                                          color: Colors.blue,
-                                          fontWeight: FontWeight.w500,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: _photoPicker(
+                          label: 'Profile Photo',
+                          isProfile: true,
+                          image: profileImage,
                         ),
                       ),
                       const SizedBox(width: 16),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text(
-                              'Cover Photo',
-                              style: TextStyle(fontWeight: FontWeight.w600),
-                            ),
-                            const SizedBox(height: 8),
-                            GestureDetector(
-                              onTap: () {},
-                              child: Container(
-                                height: 50,
-                                decoration: BoxDecoration(
-                                  border: Border.all(color: Colors.grey.shade300),
-                                  borderRadius: BorderRadius.circular(10),
-                                ),
-                                child: const Center(
-                                  child: Text(
-                                    'Upload Photo',
-                                    style: TextStyle(
-                                      color: Colors.blue,
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
+                        child: _photoPicker(
+                          label: 'Cover Photo',
+                          isProfile: false,
+                          image: coverImage,
                         ),
                       ),
                     ],
@@ -192,7 +296,9 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                       Expanded(
                         flex: 1,
                         child: GestureDetector(
-                          onTap: () {},
+                          onTap: () {
+                            // TODO: Implement current location picker if needed
+                          },
                           child: const Text(
                             'Use current location',
                             style: TextStyle(
@@ -235,21 +341,16 @@ class _BusinessInfoScreenState extends State<BusinessInfoScreen> {
                     width: double.infinity,
                     height: 52,
                     child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => const MaterialsCollectionScreen(),
-                          ),
-                        );
-                      },
+                      onPressed: isSaving ? null : _saveBusinessInfo,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF38B000),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
                       ),
-                      child: const Text(
+                      child: isSaving
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
                         'Next',
                         style: TextStyle(
                           fontSize: 18,
