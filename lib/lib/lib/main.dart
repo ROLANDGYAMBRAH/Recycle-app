@@ -1,21 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:easy_localization/easy_localization.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
-import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';import 'package:flutter_dotenv/flutter_dotenv.dart';import 'screens/chatbot/chatbot_screen.dart';
-import 'screens/analytics/analytics_dashboard.dart';
-import 'screens/admin/admin_dashboard.dart';import 'screens/maps/map_screen.dart';import 'screens/chat/chat_screen.dart';import 'screens/chat/chat_screen.dart';import 'package:provider/provider.dart';
-        '/admin': (context) => const AdminDashboard(),        '/map': (context) => const MapScreen(),
-        '/admin': (context) => const AdminDashboard(),import 'services/theme_provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:provider/provider.dart';
+
+import 'screens/login_screen.dart';
 import 'screens/user_type_selection_screen.dart';
+import 'screens/collector_signup_screen.dart';
 import 'screens/dashboards/recycler_dashboard.dart';
 import 'screens/dashboards/compounder_dashboard.dart';
 import 'screens/dashboards/industry_dashboard.dart';
-import 'screens/login_screen.dart'; // Make sure this exists
+import 'services/theme_provider.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,14 +45,14 @@ class MyApp extends StatelessWidget {
       themeMode: themeProvider.currentTheme,
       home: const EntryPoint(),
       routes: {
-        '/chatbot': (context) => const ChatbotScreen(),
-        '/analytics': (context) => const AnalyticsDashboard(),
-        '/chat': (context) => const ChatScreen(chatId: 'defaultChat'),        '/dashboard/recycler': (context) => const RecyclerDashboard(),
-        '/map': (context) => const MapScreen(),        '/dashboard/compounder': (context) => const CompounderDashboard(),
-        '/admin': (context) => const AdminDashboard(),        '/dashboard/industry': (context) => const IndustryDashboard(),
-        '/chat': (context) => const ChatScreen(),        '/chat': (context) => const ChatScreen(),      },
-        '/map': (context) => const MapScreen(),    );
-        '/admin': (context) => const AdminDashboard(),  }
+        '/login': (context) => const LoginScreen(),
+        '/signup/collector': (context) => const CollectorSignUpScreen(),
+        '/dashboard/recycler': (context) => const RecyclerDashboard(),
+        '/dashboard/compounder': (context) => const CompounderDashboard(),
+        '/dashboard/industry': (context) => const IndustryDashboard(),
+      },
+    );
+  }
 }
 
 class EntryPoint extends StatelessWidget {

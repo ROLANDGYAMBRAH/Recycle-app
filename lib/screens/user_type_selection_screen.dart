@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'compounder_signup_screen.dart';
+import 'company_signup_screen.dart'; // <-- Import this
 
 class UserTypeSelectionScreen extends StatefulWidget {
   const UserTypeSelectionScreen({super.key});
@@ -66,7 +68,7 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
             const SizedBox(height: 34),
             Expanded(
               child: ListView.separated(
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 0),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 itemCount: userTypes.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 18),
                 itemBuilder: (context, index) {
@@ -146,10 +148,21 @@ class _UserTypeSelectionScreenState extends State<UserTypeSelectionScreen> {
               padding: const EdgeInsets.fromLTRB(20, 0, 20, 28),
               child: SizedBox(
                 width: double.infinity,
-                height: 52, // Consistent height
+                height: 52,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.pushNamed(context, '/collector_signup');
+                    final selected = userTypes[selectedIndex];
+
+                    if (selected.title.contains('Compounder')) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const CompounderSignUpScreen()),
+                      );
+                    } else if (selected.title.contains('Informal')) {
+                      Navigator.pushNamed(context, '/collector_signup');
+                    } else if (selected.title.contains('Company')) {
+                      Navigator.pushNamed(context, '/company_signup'); // ✅ updated line
+                    }
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF38B000),

@@ -29,7 +29,6 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
     'Kasoa',
   ];
 
-  // Image picker function
   Future<void> _pickImage() async {
     try {
       final XFile? image = await _picker.pickImage(
@@ -51,20 +50,18 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
     }
   }
 
-  // Get current location with all updated permission checks (Geolocator v14+)
+  // ✅ Fixed version-compatible location retrieval
   Future<void> _getCurrentLocation() async {
     setState(() {
       isLoadingLocation = true;
     });
 
     try {
-      // 1. Check if location services are enabled
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
       if (!serviceEnabled) {
         throw 'Location services are disabled.';
       }
 
-      // 2. Check location permissions
       LocationPermission permission = await Geolocator.checkPermission();
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
@@ -75,17 +72,11 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
       if (permission == LocationPermission.deniedForever) {
         throw 'Location permissions are permanently denied';
       }
-      // New in v14+: handle unableToDetermine
-      if (permission == LocationPermission.unableToDetermine) {
-        throw 'Unable to determine location permissions';
-      }
+
       Position position = await Geolocator.getCurrentPosition(
-        settings: LocationSettings(
-          accuracy: LocationAccuracy.high,
-        ),
+        desiredAccuracy: LocationAccuracy.high,
       );
 
-      // 4. Get address from coordinates
       List<Placemark> placemarks = await placemarkFromCoordinates(
         position.latitude,
         position.longitude,
@@ -170,17 +161,11 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
                         hintStyle: const TextStyle(color: Color(0xFF9EA6AE)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF38B000),
-                            width: 1.5,
-                          ),
+                          borderSide: const BorderSide(color: Color(0xFF38B000), width: 1.5),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFF38B000),
-                            width: 1.5,
-                          ),
+                          borderSide: const BorderSide(color: Color(0xFF38B000), width: 1.5),
                         ),
                         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                       ),
@@ -195,15 +180,11 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
                         hintStyle: const TextStyle(color: Color(0xFF9EA6AE)),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD9E0E6),
-                          ),
+                          borderSide: const BorderSide(color: Color(0xFFD9E0E6)),
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(10),
-                          borderSide: const BorderSide(
-                            color: Color(0xFFD9E0E6),
-                          ),
+                          borderSide: const BorderSide(color: Color(0xFFD9E0E6)),
                         ),
                         contentPadding: const EdgeInsets.symmetric(vertical: 16, horizontal: 16),
                       ),
@@ -264,7 +245,6 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
                 ),
               ),
 
-              // Show selected image preview
               if (selectedImage != null) ...[
                 const SizedBox(height: 10),
                 Container(
@@ -332,7 +312,6 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
               ),
               const SizedBox(height: 6),
 
-              // Area Dropdown
               DropdownButtonFormField<String>(
                 value: selectedArea,
                 decoration: InputDecoration(
@@ -361,7 +340,6 @@ class _ProfileLocationScreenState extends State<ProfileLocationScreen> {
 
               const SizedBox(height: 36),
 
-              // Green Pill Button (consistent everywhere!)
               SizedBox(
                 width: double.infinity,
                 height: 56,
