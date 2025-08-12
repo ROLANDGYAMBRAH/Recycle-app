@@ -1,4 +1,4 @@
-# eco_trade_final
+# Recycle-app
 
 A new Flutter project.
 
